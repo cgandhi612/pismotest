@@ -19,10 +19,4 @@ public class OperationsTypes implements Serializable {
 
     @Column(name = "description")
     private String description;
-
-    public OperationsTypes(){}
-
-    public OperationsTypes(String description){
-        this.description = description;
-    }
 }

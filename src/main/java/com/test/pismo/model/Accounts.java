@@ -4,6 +4,7 @@ import javax.persistence.*;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.io.Serializable;
 
@@ -11,6 +12,7 @@ import java.io.Serializable;
 @Table(name = "accounts")
 @Getter
 @Setter
+@ToString
 public class Accounts implements Serializable {
 
     @Id
@@ -20,11 +22,4 @@ public class Accounts implements Serializable {
 
     @Column(name = "document_number", unique = true)
     private Long documentNumber;
-
-    public Accounts() {}
-
-    public Accounts(Long documentNumber) {
-        this.documentNumber = documentNumber;
-    }
-
 }

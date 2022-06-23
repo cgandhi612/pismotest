@@ -13,6 +13,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class PismoServiceImpl implements PismoService {
 
@@ -40,22 +42,34 @@ public class PismoServiceImpl implements PismoService {
     @Override
     public AccountsDTO getAccount(Long accountId) throws Exception{
         if(accountId != null)
-            return modelMapper.map(accountsRepository.getById(accountId), AccountsDTO.class);
+            return modelMapper.map(accountsRepository.findById(accountId), AccountsDTO.class);
         return null;
     }
 
     @Override
     public TransactionsDTO createTransactions(TransactionRequestDTO transactionRequestDTO) throws Exception{
         Transactions transactions = null;
-        if(transactionRequestDTO != null) {
-            Long operationsTypes = transactionRequestDTO.getOperationsTypesId();
-            if(operationsTypes == 1 || operationsTypes == 3){
-                transactions = modelMapper.map(transactionRequestDTO, Transactions.class);
-                transactions.setAmount(transactions.getAmount() * -1);
+        try {
+            if (transactionRequestDTO != null) {
+                Long operationsTypes = transactionRequestDTO.getOperationsTypesId();
+                Optional<Accounts> accounts = accountsRepository.findById(transactionRequestDTO.getAccountId());
+
+
+                if (!accounts.isPresent()) {
+                    System.out.println("Account doesn't exist");
+                    throw new Exception("Account doesn't exist");
+                }
+
+                if (operationsTypes == 1 || operationsTypes == 3) {
+                    transactions = modelMapper.map(transactionRequestDTO, Transactions.class);
+                    transactions.setAmount(transactions.getAmount() * -1);
+                }
+                Transactions trans = transactionsRepository.save(transactions);
+                TransactionsDTO transactionsDTO = modelMapper.map(trans, TransactionsDTO.class);
+                return transactionsDTO;
             }
-            Transactions trans = transactionsRepository.save(transactions);
-            TransactionsDTO transactionsDTO = modelMapper.map(trans, TransactionsDTO.class);
-            return  transactionsDTO;
+        }catch(Exception e){
+            throw e;
         }
         return null;
     }
