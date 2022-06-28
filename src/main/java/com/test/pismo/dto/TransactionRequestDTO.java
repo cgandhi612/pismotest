@@ -2,6 +2,8 @@ package com.test.pismo.dto;
 
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @ToString
@@ -10,5 +12,5 @@ import lombok.*;
 public class TransactionRequestDTO {
     private Long accountId;
     private Long operationsTypesId;
-    private Double amount;
+    private BigDecimal amount;
 }

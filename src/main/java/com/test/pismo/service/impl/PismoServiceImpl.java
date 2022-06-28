@@ -13,6 +13,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -57,7 +58,7 @@ public class PismoServiceImpl implements PismoService {
                 Optional<Accounts> accounts = accountsRepository.findById(transactionRequestDTO.getAccountId());
                 List<Transactions> listTransactions = transactionsRepository.findByAccountId(transactionRequestDTO.getAccountId());
                 List<Transactions> saveTransactions = new ArrayList<>();
-                Double remaining = 0.0;
+                BigDecimal remaining = new BigDecimal(0);
 
                 if (!accounts.isPresent()) {
                     System.out.println("Account doesn't exist");
@@ -68,22 +69,22 @@ public class PismoServiceImpl implements PismoService {
                 transactions.setAccountId(transactionRequestDTO.getAccountId());
 
                 if (operationsTypes == 1 || operationsTypes == 3) {
-                    transactions.setAmount(transactionRequestDTO.getAmount() * -1);
-                    transactions.setBalance(transactionRequestDTO.getAmount() * -1);
+                    transactions.setAmount(transactionRequestDTO.getAmount().negate());
+                    transactions.setBalance(transactionRequestDTO.getAmount().negate());
                 }else if(operationsTypes == 4){
-                    remaining = remaining + transactionRequestDTO.getAmount();
+                    remaining = remaining.add(transactionRequestDTO.getAmount());
                     if(!listTransactions.isEmpty()) {
                         for (int i=0; i<listTransactions.size(); i++){
                             Transactions transactions1 = listTransactions.get(i);
-                            if(transactions1 != null && transactions1.getAmount() < 0 && remaining > 0 ){
-                                Double balance = transactions1.getBalance();
-                                remaining = remaining + balance;
-                                if(remaining < 0) {
+                            if(transactions1 != null && transactions1.getBalance().compareTo(BigDecimal.ZERO) < 0 && remaining.compareTo(BigDecimal.ZERO) > 0 ){
+                                BigDecimal balance = transactions1.getBalance();
+                                remaining = remaining.add(balance);
+                                if(remaining.compareTo(BigDecimal.ZERO) < 0) {
                                     transactions1.setBalance(remaining);
                                     break;
                                 }
                                 else{
-                                    transactions1.setBalance(0.0);
+                                    transactions1.setBalance(BigDecimal.ZERO);
                                 }
                                 saveTransactions.add(transactions1);
                             }
@@ -92,9 +93,9 @@ public class PismoServiceImpl implements PismoService {
                             transactionsRepository.saveAll(saveTransactions);
                         }
                     }
-                    if(remaining < 0){
+                    if(remaining.compareTo(BigDecimal.ZERO) < 0){
                         transactions.setAmount(transactionRequestDTO.getAmount());
-                        transactions.setBalance(0.0);
+                        transactions.setBalance(BigDecimal.ZERO);
                     }else{
                         transactions.setAmount(transactionRequestDTO.getAmount());
                         transactions.setBalance(remaining);

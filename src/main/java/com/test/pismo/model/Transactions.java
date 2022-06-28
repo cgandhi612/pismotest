@@ -6,6 +6,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Entity
@@ -26,10 +27,10 @@ public class Transactions implements Serializable {
     private Long operationsTypesId;
 
     @Column(name="amount")
-    private Double amount;
+    private BigDecimal amount;
 
     @Column(name="balance")
-    private Double balance;
+    private BigDecimal balance;
 
     @CreationTimestamp
     @Column(name="event_date")
