@@ -16,7 +16,7 @@ public class Transactions implements Serializable {
 
     @Id
     @Column(name = "transaction_id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long transactionId;
 
     @Column(name="account_id")
@@ -27,6 +27,9 @@ public class Transactions implements Serializable {
 
     @Column(name="amount")
     private Double amount;
+
+    @Column(name="balance")
+    private Double balance;
 
     @CreationTimestamp
     @Column(name="event_date")

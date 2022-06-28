@@ -78,6 +78,36 @@ public class TransactionRoutineTest {
     }
 
     @Test
+    public void createTransaction1() throws Exception{
+        mockMvc.perform(MockMvcRequestBuilders.post("/pismo/transaction")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{ \"accountId\": \"1\",\"operationsTypesId\": \"1\",\"amount\": \"13.5\" }")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is2xxSuccessful())
+                .andDo(print());
+    }
+
+    @Test
+    public void createTransaction2() throws Exception{
+        mockMvc.perform(MockMvcRequestBuilders.post("/pismo/transaction")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{ \"accountId\": \"1\",\"operationsTypesId\": \"1\",\"amount\": \"18.7\" }")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is2xxSuccessful())
+                .andDo(print());
+    }
+
+    @Test
+    public void createTransaction3() throws Exception{
+        mockMvc.perform(MockMvcRequestBuilders.post("/pismo/transaction")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{ \"accountId\": \"1\",\"operationsTypesId\": \"4\",\"amount\": \"60\" }")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is2xxSuccessful())
+                .andDo(print());
+    }
+
+    @Test
     public void createTransactionNegative() throws Exception{
         mockMvc.perform(MockMvcRequestBuilders.post("/pismo/transaction")
                         .contentType(MediaType.APPLICATION_JSON)

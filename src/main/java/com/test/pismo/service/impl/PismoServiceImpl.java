@@ -13,6 +13,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -48,22 +50,57 @@ public class PismoServiceImpl implements PismoService {
 
     @Override
     public TransactionsDTO createTransactions(TransactionRequestDTO transactionRequestDTO) throws Exception{
-        Transactions transactions = null;
+        Transactions transactions = new Transactions();
         try {
             if (transactionRequestDTO != null) {
                 Long operationsTypes = transactionRequestDTO.getOperationsTypesId();
                 Optional<Accounts> accounts = accountsRepository.findById(transactionRequestDTO.getAccountId());
-
+                List<Transactions> listTransactions = transactionsRepository.findByAccountId(transactionRequestDTO.getAccountId());
+                List<Transactions> saveTransactions = new ArrayList<>();
+                Double remaining = 0.0;
 
                 if (!accounts.isPresent()) {
                     System.out.println("Account doesn't exist");
                     throw new Exception("Account doesn't exist");
                 }
 
+                transactions.setOperationsTypesId(transactionRequestDTO.getOperationsTypesId());
+                transactions.setAccountId(transactionRequestDTO.getAccountId());
+
                 if (operationsTypes == 1 || operationsTypes == 3) {
-                    transactions = modelMapper.map(transactionRequestDTO, Transactions.class);
-                    transactions.setAmount(transactions.getAmount() * -1);
+                    transactions.setAmount(transactionRequestDTO.getAmount() * -1);
+                    transactions.setBalance(transactionRequestDTO.getAmount() * -1);
+                }else if(operationsTypes == 4){
+                    remaining = remaining + transactionRequestDTO.getAmount();
+                    if(!listTransactions.isEmpty()) {
+                        for (int i=0; i<listTransactions.size(); i++){
+                            Transactions transactions1 = listTransactions.get(i);
+                            if(transactions1 != null && transactions1.getAmount() < 0 && remaining > 0 ){
+                                Double balance = transactions1.getBalance();
+                                remaining = remaining + balance;
+                                if(remaining < 0) {
+                                    transactions1.setBalance(remaining);
+                                    break;
+                                }
+                                else{
+                                    transactions1.setBalance(0.0);
+                                }
+                                saveTransactions.add(transactions1);
+                            }
+                        }
+                        if(!saveTransactions.isEmpty()){
+                            transactionsRepository.saveAll(saveTransactions);
+                        }
+                    }
+                    if(remaining < 0){
+                        transactions.setAmount(transactionRequestDTO.getAmount());
+                        transactions.setBalance(0.0);
+                    }else{
+                        transactions.setAmount(transactionRequestDTO.getAmount());
+                        transactions.setBalance(remaining);
+                    }
                 }
+
                 Transactions trans = transactionsRepository.save(transactions);
                 TransactionsDTO transactionsDTO = modelMapper.map(trans, TransactionsDTO.class);
                 return transactionsDTO;
